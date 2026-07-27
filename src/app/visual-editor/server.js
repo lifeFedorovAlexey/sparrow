@@ -25,8 +25,16 @@ function send(response, status, value) {
 }
 
 async function route(request, response) {
-  if (request.url === "/api/open" && request.method === "POST") return send(response, 200, await browser.open((await readJson(request)).url));
+  if (request.url === "/api/open" && request.method === "POST") {
+    const { url, delivery = "remote" } = await readJson(request);
+    return send(response, 200, await browser.open(url, { delivery }));
+  }
   if (request.url === "/api/session") return send(response, 200, browser.snapshot());
+  if (request.url?.startsWith("/api/browser/frame")) return send(response, 200, browser.frame() ?? { sequence: 0, data: null });
+  if (request.url === "/api/browser/input" && request.method === "POST") {
+    await browser.input(await readJson(request));
+    return send(response, 200, { ok: true });
+  }
   if (request.url === "/api/configurations") return send(response, 200, await schemas.list());
   if (request.url === "/api/save" && request.method === "POST") {
     const { schema } = browser.snapshot();

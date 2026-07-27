@@ -15,9 +15,9 @@
     </header>
 
     <ol class="steps">
-      <li><b>Откройте сайт</b><span>Введите URL ниже. Сайт откроется в отдельном Chrome.</span></li>
-      <li><b>Разметьте данные</b><span>Следуйте инструкции на панели поверх открытого сайта.</span></li>
-      <li><b>Проверьте результат</b><span>Вернитесь сюда: справа появится готовый JSON.</span></li>
+      <li><b>Откройте сайт</b><span>Playwright запустит изолированный браузер на сервере.</span></li>
+      <li><b>Разметьте данные</b><span>Работайте с браузером прямо в интерфейсе веб-сервиса.</span></li>
+      <li><b>Проверьте результат</b><span>JSON обновляется рядом с браузером без переключения окон.</span></li>
     </ol>
 
     <section class="launch">
@@ -25,6 +25,12 @@
       <button id="open">Открыть сайт для разметки</button>
     </section>
     <p id="status">Шаг 1. Введите адрес сайта</p>
+
+    <section id="remote-browser" class="remote-browser" tabindex="0" hidden>
+      <div class="remote-head"><b>Управляемый браузер Playwright</b><span id="remote-status">Подключение…</span></div>
+      <img id="browser-frame" alt="Экран управляемого браузера" draggable="false">
+      <p>Клики, прокрутка и ввод передаются в изолированную браузерную сессию на сервере.</p>
+    </section>
 
     <section class="workspace">
       <aside>

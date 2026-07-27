@@ -75,3 +75,22 @@ test("detects CAPTCHA and pauses for manual completion instead of bypassing it",
   assert.match(controller.snapshot().message, /CAPTCHA/u);
   assert.equal(await controller.page.locator('iframe[src*="captcha"]').count(), 1);
 });
+
+test("streams a headless Playwright session for web clients and accepts remote input", async (t) => {
+  const server = createServer((_, response) => {
+    response.setHeader("content-type", "text/html; charset=utf-8");
+    response.end('<button style="margin-top:500px;width:300px;height:120px" onclick="this.textContent=\'clicked\'">target</button>');
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => server.close());
+  const controller = new VisualBrowserController({ headless: true });
+  t.after(() => controller.close());
+
+  const state = await controller.open(`http://127.0.0.1:${server.address().port}`, { delivery: "remote" });
+  await controller.page.waitForTimeout(200);
+
+  assert.equal(state.delivery, "remote");
+  assert.ok(controller.frame()?.data);
+  await controller.input({ type: "click", x: 0.1, y: 0.62, viewportWidth: 1440, viewportHeight: 900 });
+  assert.equal(await controller.page.locator("body > button").textContent(), "clicked");
+});

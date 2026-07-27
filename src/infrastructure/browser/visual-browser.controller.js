@@ -3,13 +3,16 @@ import { createVisualSchema, selectContainer, addField } from "../../modules/vis
 import { installVisualOverlay } from "./visual-overlay.js";
 import { LiveSchemaRuntime } from "../../modules/extraction-runtime/live-schema.runtime.js";
 import { installInterferenceMitigator } from "./interference-mitigator.js";
+import { RemoteBrowserTransport } from "./remote-browser.transport.js";
 
 export class VisualBrowserController {
-  constructor({ headless = false, channel = process.env.HERMES_BROWSER_CHANNEL ?? "chrome", runtime = new LiveSchemaRuntime(), onConfirm = async () => null } = {}) {
+  constructor({ headless = false, channel = process.env.HERMES_BROWSER_CHANNEL ?? "chrome", runtime = new LiveSchemaRuntime(), onConfirm = async () => null, remoteTransport = new RemoteBrowserTransport() } = {}) {
     this.headless = headless;
     this.channel = channel;
     this.runtime = runtime;
     this.onConfirm = onConfirm;
+    this.remoteTransport = remoteTransport;
+    this.delivery = "local";
     this.browser = null;
     this.page = null;
     this.schema = null;
@@ -18,12 +21,13 @@ export class VisualBrowserController {
     this.interference = [];
   }
 
-  async open(url) {
+  async open(url, { delivery = "local" } = {}) {
     await this.close();
     this.schema = createVisualSchema(url);
     this.preview = [];
-    this.browser = await chromium.launch({ channel: this.channel, headless: this.headless });
-    const context = await this.browser.newContext({ viewport: null });
+    this.delivery = delivery === "remote" ? "remote" : "local";
+    this.browser = await chromium.launch({ channel: this.channel, headless: this.delivery === "remote" ? true : this.headless });
+    const context = await this.browser.newContext({ viewport: this.delivery === "remote" ? { width: 1440, height: 900 } : null });
     this.page = await context.newPage();
     await this.page.exposeBinding("hermesSelect", (_, selection) => this.applySelection(selection));
     await this.page.exposeBinding("hermesConfirm", () => this.confirm());
@@ -32,6 +36,7 @@ export class VisualBrowserController {
     await this.page.goto(this.schema.url, { waitUntil: "domcontentloaded", timeout: 60_000 });
     this.message = "Выберите повторяющийся блок в открытом браузере";
     await this.page.evaluate(installInterferenceMitigator);
+    if (this.delivery === "remote") await this.remoteTransport.start(this.page);
     return this.snapshot();
   }
 
@@ -69,15 +74,24 @@ export class VisualBrowserController {
     return this.snapshot();
   }
 
+  frame() {
+    return this.remoteTransport.frame();
+  }
+
+  async input(event) {
+    return this.remoteTransport.input(event);
+  }
+
   async refreshPreview() {
     this.preview = await this.runtime.execute(this.page, this.schema);
   }
 
   snapshot() {
-    return { schema: this.schema, preview: this.preview.slice(0, 20), total: this.preview.length, message: this.message, interference: [...this.interference] };
+    return { schema: this.schema, preview: this.preview.slice(0, 20), total: this.preview.length, message: this.message, interference: [...this.interference], delivery: this.delivery, streamAvailable: Boolean(this.frame()) };
   }
 
   async close() {
+    await this.remoteTransport.stop();
     if (this.browser) await this.browser.close().catch(() => {});
     this.browser = null;
     this.page = null;
