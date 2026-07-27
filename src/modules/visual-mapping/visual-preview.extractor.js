@@ -1,7 +1,7 @@
 import * as cheerio from "cheerio";
 
 function readValue($, container, field) {
-  const element = field.selector === ":scope" ? $(container) : $(container).find(field.selector).first();
+  const element = field.selector === ":scope" ? $(container) : $(container).find(field.selector).eq(field.matchIndex ?? 0);
   if (field.attribute === "text" || !field.attribute) return element.text().trim();
   return String(element.attr(field.attribute) ?? "");
 }

@@ -22,6 +22,6 @@ export function addField(schema, field) {
   if (schema.fields.some((item) => item.name === name)) throw new Error(`Field '${name}' already exists`);
   return freezeSchema({
     ...schema,
-    fields: [...schema.fields, { name, selector, attribute: field.attribute ?? "text" }],
+    fields: [...schema.fields, { name, selector, matchIndex: Number(field.matchIndex ?? 0), attribute: field.attribute ?? "text" }],
   });
 }

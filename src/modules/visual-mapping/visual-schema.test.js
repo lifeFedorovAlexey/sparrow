@@ -5,10 +5,10 @@ import { createVisualSchema, selectContainer, addField } from "./visual-schema.j
 test("stores arbitrary user field names without a predefined dictionary", () => {
   let schema = createVisualSchema("https://example.com/catalog");
   schema = selectContainer(schema, "article.card");
-  schema = addField(schema, { name: "плотность ткани", selector: ".density", attribute: "text" });
+  schema = addField(schema, { name: "плотность ткани", selector: ".density", matchIndex: 2, attribute: "text" });
 
   assert.deepEqual(schema.fields, [
-    { name: "плотность ткани", selector: ".density", attribute: "text" },
+    { name: "плотность ткани", selector: ".density", matchIndex: 2, attribute: "text" },
   ]);
 });
 

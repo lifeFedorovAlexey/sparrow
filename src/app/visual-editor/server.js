@@ -6,8 +6,8 @@ import { VisualBrowserController } from "../../infrastructure/browser/visual-bro
 import { VisualSchemaRepository } from "../../infrastructure/storage/visual-schema.repository.js";
 
 const publicRoot = join(dirname(fileURLToPath(import.meta.url)), "public");
-const browser = new VisualBrowserController();
 const schemas = new VisualSchemaRepository();
+const browser = new VisualBrowserController({ onConfirm: (schema) => schemas.save(schema) });
 const mime = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8" };
 
 async function readJson(request) {

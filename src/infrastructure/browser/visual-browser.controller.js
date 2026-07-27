@@ -4,10 +4,11 @@ import { installVisualOverlay } from "./visual-overlay.js";
 import { LiveSchemaRuntime } from "../../modules/extraction-runtime/live-schema.runtime.js";
 
 export class VisualBrowserController {
-  constructor({ headless = false, channel = process.env.HERMES_BROWSER_CHANNEL ?? "chrome", runtime = new LiveSchemaRuntime() } = {}) {
+  constructor({ headless = false, channel = process.env.HERMES_BROWSER_CHANNEL ?? "chrome", runtime = new LiveSchemaRuntime(), onConfirm = async () => null } = {}) {
     this.headless = headless;
     this.channel = channel;
     this.runtime = runtime;
+    this.onConfirm = onConfirm;
     this.browser = null;
     this.page = null;
     this.schema = null;
@@ -23,6 +24,7 @@ export class VisualBrowserController {
     const context = await this.browser.newContext({ viewport: null });
     this.page = await context.newPage();
     await this.page.exposeBinding("hermesSelect", (_, selection) => this.applySelection(selection));
+    await this.page.exposeBinding("hermesConfirm", () => this.confirm());
     await this.page.addInitScript(installVisualOverlay);
     await this.page.goto(this.schema.url, { waitUntil: "domcontentloaded", timeout: 60_000 });
     this.message = "Выберите повторяющийся блок в открытом браузере";
@@ -47,6 +49,14 @@ export class VisualBrowserController {
     await this.refreshPreview();
     this.message = selection.type === "container" ? "Теперь добавьте поля" : `Добавлено поле: ${selection.name}`;
     return this.snapshot();
+  }
+
+  async confirm() {
+    if (!this.schema?.fields.length || !this.preview.length) throw new Error("Сначала выберите поля");
+    const saved = await this.onConfirm(this.schema);
+    this.message = "Конфигурация подтверждена и сохранена";
+    setTimeout(() => this.close(), 300);
+    return saved;
   }
 
   async refreshPreview() {

@@ -2,7 +2,7 @@ export class LiveSchemaRuntime {
   async execute(page, schema) {
     if (!schema?.containerSelector) return [];
     return page.$$eval(schema.containerSelector, (containers, fields) => containers.map((container) => Object.fromEntries(fields.map((field) => {
-      const element = field.selector === ":scope" ? container : container.querySelector(field.selector);
+      const element = field.selector === ":scope" ? container : container.querySelectorAll(field.selector)[field.matchIndex ?? 0];
       if (!element) return [field.name, { status: "missing", value: null }];
       const value = field.attribute === "text" ? element.textContent?.trim() ?? "" : element.getAttribute(field.attribute);
       return [field.name, value];
