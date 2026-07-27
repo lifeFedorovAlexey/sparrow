@@ -1,0 +1,16 @@
+{
+  "name": "hermes-parser-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Modular AI platform that designs, generates, validates, and maintains website parsers.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/app/cli.js",
+    "test": "node --test",
+    "test:watch": "node --test --watch"
+  },
+  "license": "MIT"
+}
