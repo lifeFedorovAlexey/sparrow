@@ -50,5 +50,13 @@ async function route(request, response) {
 
 const server = createServer((request, response) => route(request, response).catch((error) => send(response, 400, { error: error.message })));
 const port = Number(process.env.PORT ?? 4310);
+server.on("error", (error) => {
+  if (error.code === "EADDRINUSE") {
+    console.log(`Hermes Visual Parser уже запущен: http://127.0.0.1:${port}`);
+    return;
+  }
+  console.error(`Не удалось запустить Hermes Visual Parser: ${error.message}`);
+  process.exitCode = 1;
+});
 server.listen(port, "127.0.0.1", () => console.log(`Hermes Visual Parser: http://127.0.0.1:${port}`));
 process.on("SIGINT", async () => { await browser.close(); server.close(); });
