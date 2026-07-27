@@ -1,1 +1,84 @@
-:root{font-family:Inter,system-ui,sans-serif;color:#e5e7eb;background:#080b12}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 20% 0,#1f1647 0,transparent 35%),#080b12}main{max-width:1180px;margin:auto;padding:56px 28px}.eyebrow{color:#a78bfa;letter-spacing:.16em;font-size:12px;font-weight:800}h1{font-size:44px;margin:8px 0}header>p:last-child{color:#9ca3af;max-width:700px}.launch{display:flex;gap:12px;margin:34px 0 14px}input{flex:1;background:#111827;border:1px solid #374151;border-radius:12px;color:white;padding:15px 18px;font-size:16px}button{background:#7c3aed;color:white;border:0;border-radius:11px;padding:13px 18px;font-weight:700;cursor:pointer}button:disabled{opacity:.35;cursor:not-allowed}#status{color:#a78bfa;min-height:24px}.workspace{display:grid;grid-template-columns:340px 1fr;gap:18px;margin-top:24px}.workspace>*{background:#0f172a;border:1px solid #263147;border-radius:16px;padding:22px}h2{margin-top:0}.empty{color:#6b7280}.field{padding:10px 0;border-bottom:1px solid #263147}.field b{display:block}.field code{color:#a78bfa;font-size:12px;overflow-wrap:anywhere}#generate{width:100%;margin-top:20px}.preview-head{display:flex;justify-content:space-between}#count{color:#9ca3af}pre{margin:0;max-height:520px;overflow:auto;color:#a7f3d0;font-size:13px;white-space:pre-wrap}#project{color:#34d399;overflow-wrap:anywhere}@media(max-width:800px){.workspace{grid-template-columns:1fr}.launch{flex-direction:column}h1{font-size:34px}}
+:root {
+  font-family: Inter, system-ui, sans-serif;
+  color: #e5e7eb;
+  background: #080b12;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at 20% 0, #1f1647 0, transparent 35%), #080b12;
+}
+main { max-width: 1180px; margin: auto; padding: 48px 28px; }
+.eyebrow { color: #a78bfa; letter-spacing: .16em; font-size: 12px; font-weight: 800; }
+h1 { font-size: 44px; margin: 8px 0; }
+header > p:last-child { color: #9ca3af; max-width: 760px; font-size: 17px; }
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 0;
+  margin: 30px 0;
+  list-style: none;
+  counter-reset: steps;
+}
+.steps li {
+  position: relative;
+  padding: 18px 18px 18px 54px;
+  background: #111827;
+  border: 1px solid #293449;
+  border-radius: 14px;
+  counter-increment: steps;
+}
+.steps li::before {
+  content: counter(steps);
+  position: absolute;
+  left: 16px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #7c3aed;
+  font-weight: 800;
+}
+.steps b, .steps span { display: block; }
+.steps span { margin-top: 5px; color: #9ca3af; font-size: 13px; line-height: 1.4; }
+.launch { display: flex; gap: 12px; margin: 28px 0 12px; }
+input {
+  flex: 1;
+  background: #111827;
+  border: 1px solid #4b5563;
+  border-radius: 12px;
+  color: white;
+  padding: 15px 18px;
+  font-size: 16px;
+}
+button {
+  background: #7c3aed;
+  color: white;
+  border: 0;
+  border-radius: 11px;
+  padding: 13px 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+button:disabled { opacity: .35; cursor: not-allowed; }
+#status { color: #c4b5fd; min-height: 24px; font-weight: 700; }
+.workspace { display: grid; grid-template-columns: 340px 1fr; gap: 18px; margin-top: 24px; }
+.workspace > * { background: #0f172a; border: 1px solid #263147; border-radius: 16px; padding: 22px; }
+h2 { margin-top: 0; }
+.empty { color: #6b7280; line-height: 1.5; }
+.field { padding: 10px 0; border-bottom: 1px solid #263147; }
+.field b { display: block; }
+.field code { color: #a78bfa; font-size: 12px; overflow-wrap: anywhere; }
+#generate { width: 100%; margin-top: 20px; }
+.preview-head { display: flex; justify-content: space-between; }
+#count { color: #9ca3af; }
+pre { margin: 0; max-height: 520px; overflow: auto; color: #a7f3d0; font-size: 13px; white-space: pre-wrap; }
+#project { color: #34d399; overflow-wrap: anywhere; }
+@media (max-width: 800px) {
+  .steps, .workspace { grid-template-columns: 1fr; }
+  .launch { flex-direction: column; }
+  h1 { font-size: 34px; }
+}

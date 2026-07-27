@@ -1,1 +1,47 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Hermes Visual Parser</title><link rel="stylesheet" href="/styles.css"></head><body><main><header><p class="eyebrow">HERMES PARSER AI</p><h1>Визуальная разметка сайта</h1><p>Откройте страницу, выберите повторяющийся блок и подпишите любые поля прямо поверх сайта.</p></header><section class="launch"><input id="url" type="url" placeholder="https://example.com/catalog"><button id="open">Открыть сайт</button></section><p id="status">Откройте сайт для начала</p><section class="workspace"><aside><h2>Схема</h2><div id="schema" class="empty">Блок ещё не выбран</div><button id="generate" disabled>Создать парсер</button><p id="project"></p></aside><article><div class="preview-head"><h2>Предпросмотр JSON</h2><span id="count">0 записей</span></div><pre id="preview">[]</pre></article></section></main><script type="module" src="/app.js"></script></body></html>
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Hermes Visual Parser</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">HERMES PARSER AI</p>
+      <h1>Создание парсера по кликам</h1>
+      <p>Откройте сайт, отметьте повторяющуюся строку и подпишите нужные значения. Названия полей могут быть любыми.</p>
+    </header>
+
+    <ol class="steps">
+      <li><b>Откройте сайт</b><span>Введите URL ниже. Сайт откроется в отдельном Chrome.</span></li>
+      <li><b>Разметьте данные</b><span>Следуйте инструкции на панели поверх открытого сайта.</span></li>
+      <li><b>Проверьте результат</b><span>Вернитесь сюда: справа появится готовый JSON.</span></li>
+    </ol>
+
+    <section class="launch">
+      <input id="url" type="url" placeholder="https://example.com/catalog">
+      <button id="open">Открыть сайт для разметки</button>
+    </section>
+    <p id="status">Шаг 1. Введите адрес сайта</p>
+
+    <section class="workspace">
+      <aside>
+        <h2>Что выбрано</h2>
+        <div id="schema" class="empty">Сначала откройте сайт и выберите строку в окне Chrome.</div>
+        <button id="generate" disabled>Создать готовый парсер</button>
+        <p id="project"></p>
+      </aside>
+      <article>
+        <div class="preview-head">
+          <h2>Предпросмотр результата</h2>
+          <span id="count">0 записей</span>
+        </div>
+        <pre id="preview">[]</pre>
+      </article>
+    </section>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

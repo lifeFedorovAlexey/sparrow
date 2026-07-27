@@ -1,13 +1,14 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { VisualBrowserController } from "../../infrastructure/browser/visual-browser.controller.js";
 import { ProjectGenerator } from "../../modules/project-generation/project-generator.agent.js";
+import { resolveProjectsRoot } from "../../infrastructure/storage/projects-root.js";
 
 const publicRoot = join(dirname(fileURLToPath(import.meta.url)), "public");
 const browser = new VisualBrowserController();
-const generator = new ProjectGenerator({ projectsRoot: resolve("projects") });
+const generator = new ProjectGenerator({ projectsRoot: resolveProjectsRoot() });
 const mime = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8" };
 
 async function readJson(request) {

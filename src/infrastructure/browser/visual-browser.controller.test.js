@@ -8,7 +8,7 @@ const html = `<!doctype html><html><body>
   <article class="card"><b class="hero">Ahri</b><span class="metric">52%</span></article>
 </body></html>`;
 
-test("visual browser injects overlay and previews arbitrary user labels", async (t) => {
+test("visual browser guides clicks and previews arbitrary user labels", async (t) => {
   const server = createServer((_, response) => response.end(html));
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   t.after(() => server.close());
@@ -17,11 +17,21 @@ test("visual browser injects overlay and previews arbitrary user labels", async 
   t.after(() => controller.close());
 
   await controller.open(`http://127.0.0.1:${port}`);
-  assert.equal(await controller.page.locator("#hermes-visual-toolbar").count(), 1);
-  await controller.applySelection({ type: "container", selector: "article.card", count: 2 });
-  await controller.applySelection({ type: "field", name: "любой заголовок", selector: ".hero", attribute: "text" });
-  await controller.applySelection({ type: "field", name: "любая метрика", selector: ".metric", attribute: "text" });
+  const page = controller.page;
+  assert.equal(await page.locator("#hermes-visual-toolbar").count(), 1);
 
+  await page.locator("[data-mode=container]").click();
+  await page.locator(".hero").first().evaluate((element) => element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true })));
+  await page.waitForTimeout(100);
+  assert.equal(controller.snapshot().schema.containerSelector, "article.card");
+
+  await page.locator("[data-mode=field]").click();
+  await page.locator(".hero").first().evaluate((element) => element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true })));
+  await page.locator("#hermes-visual-toolbar input").fill("любой заголовок");
+  await page.locator("[data-save]").click();
+  await page.waitForFunction(() => document.querySelector("[data-role=fields]").textContent.includes("любой заголовок"));
+
+  await controller.applySelection({ type: "field", name: "любая метрика", selector: ".metric", attribute: "text" });
   assert.deepEqual(controller.snapshot().preview, [
     { "любой заголовок": "Aatrox", "любая метрика": "51%" },
     { "любой заголовок": "Ahri", "любая метрика": "52%" },
