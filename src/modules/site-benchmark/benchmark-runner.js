@@ -19,19 +19,22 @@ export class BenchmarkRunner {
       try {
         const profile = await this.probe.inspect(site.url);
         const strategies = this.strategies.compose(profile).map(({ id }) => id);
-        results.push({ ...site, status: "succeeded", profile, strategies });
+        const blocked = profile.protections?.some((item) => item.value === "access-blocked");
+        results.push({ ...site, status: blocked ? "blocked" : "succeeded", profile, strategies });
       } catch (error) {
         results.push({ ...site, status: "failed", error: error instanceof Error ? error.message : String(error), strategies: [] });
       }
     }
     const succeeded = results.filter((item) => item.status === "succeeded");
+    const blocked = results.filter((item) => item.status === "blocked");
     return {
       generatedAt: new Date().toISOString(),
       summary: {
         total: results.length,
         succeeded: succeeded.length,
-        failed: results.length - succeeded.length,
-        strategyUsage: countBy(succeeded.flatMap((item) => item.strategies)),
+        blocked: blocked.length,
+        failed: results.length - succeeded.length - blocked.length,
+        strategyUsage: countBy([...succeeded, ...blocked].flatMap((item) => item.strategies)),
       },
       sites: results,
     };

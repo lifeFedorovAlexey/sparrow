@@ -42,3 +42,16 @@ test("keeps failures explicit and continues with remaining sites", async () => {
   assert.equal(report.sites[0].error, "navigation timeout");
   assert.equal(report.sites[1].status, "succeeded");
 });
+
+test("reports access challenges as blocked instead of successful coverage", async () => {
+  const blocked = profile("https://blocked.example");
+  blocked.protections = [{ value: "access-blocked", evidence: [{ kind: "http-status", detail: "HTTP 498", source: "https://blocked.example" }] }];
+  const runner = new BenchmarkRunner({ probe: { inspect: async () => blocked } });
+
+  const report = await runner.run([{ name: "Blocked", url: "https://blocked.example" }]);
+
+  assert.equal(report.summary.blocked, 1);
+  assert.equal(report.summary.succeeded, 0);
+  assert.equal(report.sites[0].status, "blocked");
+  assert.ok(report.sites[0].strategies.includes("protected-session-gate"));
+});

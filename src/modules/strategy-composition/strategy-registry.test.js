@@ -34,3 +34,10 @@ test("composes directly from evidence-backed claim objects", () => {
 
   assert.deepEqual(strategies, ["structured-data-first", "api-first", "shadow-dom", "pagination"]);
 });
+
+test("uses an automatic protection-aware session unless an actual challenge blocks access", () => {
+  assert.deepEqual(registry.compose({ protections: ["cloudflare"] }).map(({ id }) => id), ["protection-aware-session"]);
+  assert.deepEqual(registry.compose({ protections: ["cloudflare", "access-blocked"] }).map(({ id }) => id), [
+    "protection-aware-session", "protected-session-gate",
+  ]);
+});

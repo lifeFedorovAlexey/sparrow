@@ -12,8 +12,9 @@ const definitions = [
   { id: "load-more", when: (p) => has(p.listPatterns, "load-more") },
   { id: "pagination", when: (p) => has(p.listPatterns, "pagination") || has(p.listPatterns, "api-pagination") },
   { id: "stream-collector", when: (p) => has(p.transports, "websocket") || has(p.transports, "streaming") },
+  { id: "protection-aware-session", when: (p) => ["cloudflare", "datadome", "akamai", "imperva", "fingerprint"].some((kind) => has(p.protections, kind)) },
   { id: "rate-limiter", when: (p) => has(p.protections, "rate-limit") },
-  { id: "protected-session-gate", when: (p) => ["captcha", "cloudflare", "datadome", "akamai", "imperva", "turnstile", "recaptcha", "hcaptcha", "fingerprint"].some((kind) => has(p.protections, kind)) },
+  { id: "protected-session-gate", when: (p) => ["access-blocked", "captcha", "turnstile", "recaptcha", "hcaptcha"].some((kind) => has(p.protections, kind)) },
 ];
 
 export class StrategyRegistry {

@@ -30,6 +30,7 @@ function inspectDom() {
     if (found) protectionMarkers.push({ value, detail: found.outerHTML.slice(0, 180) });
   }
   return {
+    pageUrl: location.href,
     next: marker("#__next, script[src*='/_next/']"),
     nuxt: marker("#__nuxt, script[src*='/_nuxt/']"),
     angular: marker("[ng-version]"),

@@ -18,7 +18,8 @@ function detectFramework(dom, responses) {
 
 function detectTransports(dom, responses) {
   const result = [];
-  const documentResponse = responses.find((item) => item.resourceType === "document");
+  const documentResponses = responses.filter((item) => item.resourceType === "document");
+  const documentResponse = [...documentResponses].reverse().find((item) => item.url === dom.pageUrl) ?? documentResponses.at(-1);
   if (documentResponse) result.push(claim("html", "response", `HTTP ${documentResponse.status} ${documentResponse.contentType}`, documentResponse.url));
   if (dom.jsonLd) result.push(claim("json-ld", "dom-marker", `${dom.jsonLd} application/ld+json script(s)`, "browser:dom"));
   if (dom.jsonScript) result.push(claim("json-script", "dom-marker", `${dom.jsonScript} embedded JSON script(s)`, "browser:dom"));
@@ -32,7 +33,10 @@ function detectTransports(dom, responses) {
   return valuesOrUnknown(result);
 }
 
-function detectApplication(framework, dom, transports) {
+function detectApplication(framework, dom, transports, responses) {
+  const finalDocument = [...responses].reverse().find((item) => item.resourceType === "document" && item.url === dom.pageUrl)
+    ?? [...responses].reverse().find((item) => item.resourceType === "document");
+  if (!finalDocument || finalDocument.status >= 300) return unknown();
   const hasApi = transports.some((item) => ["rest", "graphql", "websocket"].includes(item.value));
   const hydrated = ["nextjs", "nuxt"].includes(framework.value);
   if (hydrated && dom.meaningfulText && hasApi) return claim("hybrid", "combined-observation", "server-visible content plus client data transport", "browser:dom+network");
@@ -89,6 +93,7 @@ function detectProtections(dom, responses) {
     const server = response.headers.server ?? "";
     if (/cf-ray/iu.test(headerNames) || /cloudflare/iu.test(server)) result.push(claim("cloudflare", "response-header", `server=${server}; cf-ray=${response.headers["cf-ray"] ?? "present"}`, response.url));
     if (response.status === 429) result.push(claim("rate-limit", "http-status", "HTTP 429", response.url));
+    if ([403, 418, 429, 498].includes(response.status)) result.push(claim("access-blocked", "http-status", `HTTP ${response.status}`, response.url));
     if (/akamai/iu.test(`${server} ${headerNames}`)) result.push(claim("akamai", "response-header", `server=${server}`, response.url));
     if (/imperva|incapsula/iu.test(`${server} ${headerNames}`)) result.push(claim("imperva", "response-header", `server=${server}`, response.url));
   }
@@ -101,7 +106,7 @@ export function buildEvidenceProfile({ site, dom, responses }) {
   const transports = detectTransports(dom, responses);
   return validateEvidenceProfile({
     site,
-    applicationType: detectApplication(framework, dom, transports),
+    applicationType: detectApplication(framework, dom, transports, responses),
     framework,
     transports,
     listPatterns: detectListPatterns(dom),
