@@ -105,7 +105,8 @@ export function installVisualOverlay() {
       const selection = relativeSelection(element, container);
       const snapshot = await window.hermesSelect({ type: "field", name, ...selection, attribute });
       document.querySelectorAll(containerSelector).forEach((row) => row.querySelectorAll(selection.selector)[selection.matchIndex]?.style.setProperty("outline", "2px solid #22d3ee"));
-      fieldNames.push(name); fieldsView.textContent = `Поля: ${fieldNames.join(", ")}`;
+      const savedField = snapshot.schema.fields.at(-1);
+      fieldNames.push(`${savedField.label} → ${savedField.name}`); fieldsView.textContent = `Поля JSON: ${fieldNames.join(", ")}`;
       instruction.textContent = "Проверьте JSON ниже. Добавьте поля или подтвердите результат.";
       renderResult(snapshot);
     }

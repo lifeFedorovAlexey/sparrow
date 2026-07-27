@@ -44,8 +44,8 @@ test("visual browser guides clicks and previews arbitrary user labels", async (t
   assert.equal(controller.snapshot().schema.fields[1].selector, 'span[class*="Catalog-module__"][class*="__metric"]');
   assert.equal(controller.snapshot().schema.fields[1].matchIndex, 2);
   assert.deepEqual(controller.snapshot().preview, [
-    { "любой заголовок": "Aatrox", "любая метрика": "51%" },
-    { "любой заголовок": "Ahri", "любая метрика": "52%" },
+    { "lyuboy_zagolovok": "Aatrox", "lyubaya_metrika": "51%" },
+    { "lyuboy_zagolovok": "Ahri", "lyubaya_metrika": "52%" },
   ]);
   await page.locator("[data-confirm]").click();
   await page.waitForFunction(() => document.querySelector("[data-role=instruction]").textContent.includes("Сохраняю"));

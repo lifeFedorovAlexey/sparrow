@@ -18,7 +18,7 @@ function render(state) {
   if (!schema?.containerSelector) {
     $("#schema").innerHTML = '<div class="empty">Выберите повторяющийся блок в открытом браузере</div>';
   } else {
-    $("#schema").innerHTML = `<div class="field"><b>Повторяющийся блок</b><code>${escapeHtml(schema.containerSelector)}</code></div>${schema.fields.map((field) => `<div class="field"><b>${escapeHtml(field.name)}</b><code>${escapeHtml(field.selector)}</code></div>`).join("")}`;
+    $("#schema").innerHTML = `<div class="field"><b>Повторяющийся блок</b><code>${escapeHtml(schema.containerSelector)}</code></div>${schema.fields.map((field) => `<div class="field"><b>${escapeHtml(field.label ?? field.name)} → ${escapeHtml(field.name)}</b><code>${escapeHtml(field.selector)}</code></div>`).join("")}`;
   }
   $("#save").disabled = !schema?.fields.length || !state.total;
 }

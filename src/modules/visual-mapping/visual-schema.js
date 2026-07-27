@@ -1,3 +1,5 @@
+import { normalizeFieldKey } from "./normalize-field-key.js";
+
 function freezeSchema(schema) {
   return Object.freeze({ ...schema, fields: Object.freeze([...schema.fields]) });
 }
@@ -14,7 +16,8 @@ export function selectContainer(schema, selector) {
 }
 
 export function addField(schema, field) {
-  const name = String(field.name ?? "").trim();
+  const label = String(field.name ?? "").trim();
+  const name = normalizeFieldKey(label);
   const selector = String(field.selector ?? "").trim();
   if (!name) throw new Error("Field name is required");
   if (!selector) throw new Error("Field selector is required");
@@ -22,6 +25,6 @@ export function addField(schema, field) {
   if (schema.fields.some((item) => item.name === name)) throw new Error(`Field '${name}' already exists`);
   return freezeSchema({
     ...schema,
-    fields: [...schema.fields, { name, selector, matchIndex: Number(field.matchIndex ?? 0), attribute: field.attribute ?? "text" }],
+    fields: [...schema.fields, { name, label, selector, matchIndex: Number(field.matchIndex ?? 0), attribute: field.attribute ?? "text" }],
   });
 }

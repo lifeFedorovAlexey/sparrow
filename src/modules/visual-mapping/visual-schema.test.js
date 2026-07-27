@@ -8,7 +8,7 @@ test("stores arbitrary user field names without a predefined dictionary", () => 
   schema = addField(schema, { name: "плотность ткани", selector: ".density", matchIndex: 2, attribute: "text" });
 
   assert.deepEqual(schema.fields, [
-    { name: "плотность ткани", selector: ".density", matchIndex: 2, attribute: "text" },
+    { name: "plotnost_tkani", label: "плотность ткани", selector: ".density", matchIndex: 2, attribute: "text" },
   ]);
 });
 
@@ -18,7 +18,7 @@ test("rejects non-http URLs", () => {
 
 test("rejects empty and duplicate field names", () => {
   let schema = selectContainer(createVisualSchema("https://example.com"), ".row");
-  assert.throws(() => addField(schema, { name: " ", selector: ".value" }), /name/i);
+  assert.throws(() => addField(schema, { name: " ", selector: ".value" }), /название|name/i);
   schema = addField(schema, { name: "любое поле", selector: ".value" });
   assert.throws(() => addField(schema, { name: "любое поле", selector: ".other" }), /already exists/i);
 });
