@@ -42,8 +42,9 @@ async function route(request, response) {
   const destination = join(publicRoot, path);
   if (!destination.startsWith(publicRoot)) return send(response, 403, { error: "Forbidden" });
   const extension = path.slice(path.lastIndexOf("."));
+  const content = await readFile(destination);
   response.writeHead(200, { "content-type": mime[extension] ?? "application/octet-stream" });
-  response.end(await readFile(destination));
+  response.end(content);
 }
 
 const server = createServer((request, response) => route(request, response).catch((error) => send(response, 400, { error: error.message })));
