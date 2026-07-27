@@ -72,7 +72,7 @@ h2 { margin-top: 0; }
 .field { padding: 10px 0; border-bottom: 1px solid #263147; }
 .field b { display: block; }
 .field code { color: #a78bfa; font-size: 12px; overflow-wrap: anywhere; }
-#generate { width: 100%; margin-top: 20px; }
+#save { width: 100%; margin-top: 20px; }
 .preview-head { display: flex; justify-content: space-between; }
 #count { color: #9ca3af; }
 pre { margin: 0; max-height: 520px; overflow: auto; color: #a7f3d0; font-size: 13px; white-space: pre-wrap; }

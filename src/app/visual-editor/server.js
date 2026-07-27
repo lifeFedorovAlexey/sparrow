@@ -3,12 +3,11 @@ import { readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { VisualBrowserController } from "../../infrastructure/browser/visual-browser.controller.js";
-import { ProjectGenerator } from "../../modules/project-generation/project-generator.agent.js";
-import { resolveProjectsRoot } from "../../infrastructure/storage/projects-root.js";
+import { VisualSchemaRepository } from "../../infrastructure/storage/visual-schema.repository.js";
 
 const publicRoot = join(dirname(fileURLToPath(import.meta.url)), "public");
 const browser = new VisualBrowserController();
-const generator = new ProjectGenerator({ projectsRoot: resolveProjectsRoot() });
+const schemas = new VisualSchemaRepository();
 const mime = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8" };
 
 async function readJson(request) {
@@ -28,16 +27,16 @@ function send(response, status, value) {
 async function route(request, response) {
   if (request.url === "/api/open" && request.method === "POST") return send(response, 200, await browser.open((await readJson(request)).url));
   if (request.url === "/api/session") return send(response, 200, browser.snapshot());
-  if (request.url === "/api/generate" && request.method === "POST") {
+  if (request.url === "/api/configurations") return send(response, 200, await schemas.list());
+  if (request.url === "/api/save" && request.method === "POST") {
     const { schema } = browser.snapshot();
     if (!schema?.fields.length) throw new Error("Добавьте хотя бы одно поле");
-    const project = await generator.execute({
-      projectName: new URL(schema.url).hostname,
-      task: { url: schema.url },
-      containerSelector: schema.containerSelector,
-      mappings: schema.fields.map((field) => ({ field: field.name, selector: field.selector, attribute: field.attribute })),
-    });
-    return send(response, 200, project);
+    return send(response, 200, await schemas.save(schema));
+  }
+  if (request.url === "/api/run" && request.method === "POST") {
+    const configuration = await schemas.find((await readJson(request)).id);
+    if (!configuration) throw new Error("Конфигурация не найдена");
+    return send(response, 200, await browser.executeSchema(configuration.schema));
   }
   const path = request.url === "/" ? "/index.html" : request.url;
   const destination = join(publicRoot, path);

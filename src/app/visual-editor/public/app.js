@@ -20,7 +20,7 @@ function render(state) {
   } else {
     $("#schema").innerHTML = `<div class="field"><b>Повторяющийся блок</b><code>${escapeHtml(schema.containerSelector)}</code></div>${schema.fields.map((field) => `<div class="field"><b>${escapeHtml(field.name)}</b><code>${escapeHtml(field.selector)}</code></div>`).join("")}`;
   }
-  $("#generate").disabled = !schema?.fields.length || !state.total;
+  $("#save").disabled = !schema?.fields.length || !state.total;
 }
 
 $("#open").addEventListener("click", async () => {
@@ -31,11 +31,11 @@ $("#open").addEventListener("click", async () => {
   } catch (error) { $("#status").textContent = `Ошибка: ${error.message}`; }
 });
 
-$("#generate").addEventListener("click", async () => {
+$("#save").addEventListener("click", async () => {
   try {
-    const result = await request("/api/generate", { method: "POST" });
-    $("#project").textContent = `Проект создан: ${result.projectPath}`;
-  } catch (error) { $("#project").textContent = `Ошибка: ${error.message}`; }
+    const result = await request("/api/save", { method: "POST" });
+    $("#saved").textContent = `Конфигурация сохранена: ${result.id}. Её выполняет общий runtime.`;
+  } catch (error) { $("#saved").textContent = `Ошибка: ${error.message}`; }
 });
 
 setInterval(async () => {

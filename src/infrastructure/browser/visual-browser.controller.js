@@ -1,11 +1,13 @@
 import { chromium } from "playwright-core";
 import { createVisualSchema, selectContainer, addField } from "../../modules/visual-mapping/visual-schema.js";
 import { installVisualOverlay } from "./visual-overlay.js";
+import { LiveSchemaRuntime } from "../../modules/extraction-runtime/live-schema.runtime.js";
 
 export class VisualBrowserController {
-  constructor({ headless = false, channel = process.env.HERMES_BROWSER_CHANNEL ?? "chrome" } = {}) {
+  constructor({ headless = false, channel = process.env.HERMES_BROWSER_CHANNEL ?? "chrome", runtime = new LiveSchemaRuntime() } = {}) {
     this.headless = headless;
     this.channel = channel;
+    this.runtime = runtime;
     this.browser = null;
     this.page = null;
     this.schema = null;
@@ -27,6 +29,14 @@ export class VisualBrowserController {
     return this.snapshot();
   }
 
+  async executeSchema(schema) {
+    await this.open(schema.url);
+    this.schema = schema;
+    await this.refreshPreview();
+    this.message = `Конфигурация выполнена: ${this.preview.length} записей`;
+    return this.snapshot();
+  }
+
   async applySelection(selection) {
     if (selection.type === "container") {
       if (selection.count < 2) throw new Error("Выбранный блок не повторяется");
@@ -40,12 +50,7 @@ export class VisualBrowserController {
   }
 
   async refreshPreview() {
-    const schema = this.schema;
-    this.preview = await this.page.$$eval(schema.containerSelector, (containers, fields) => containers.map((container) => Object.fromEntries(fields.map((field) => {
-      const element = field.selector === ":scope" ? container : container.querySelector(field.selector);
-      const value = field.attribute === "text" ? element?.textContent?.trim() ?? "" : element?.getAttribute(field.attribute) ?? "";
-      return [field.name, value];
-    }))), schema.fields);
+    this.preview = await this.runtime.execute(this.page, this.schema);
   }
 
   snapshot() {
