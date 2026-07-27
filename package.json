@@ -9,11 +9,13 @@
   },
   "scripts": {
     "start": "node src/app/cli.js",
+    "visual": "node src/app/visual-editor/server.js",
     "test": "node --test",
     "test:watch": "node --test --watch"
   },
   "license": "MIT",
   "dependencies": {
-    "cheerio": "^1.1.2"
+    "cheerio": "^1.1.2",
+    "playwright-core": "^1.54.2"
   }
 }

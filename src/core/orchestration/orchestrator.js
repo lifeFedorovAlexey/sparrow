@@ -31,6 +31,7 @@ export class HermesParserOrchestrator {
     const dom = await this.#executeAgent(runId, this.domAnalyzer, { html: site.html, site });
     if (!dom.primaryContainer) throw new Error("No repeated item container was found on the page");
     const fields = await this.#executeAgent(runId, this.fieldMapper, { requestedFields: task.fields, dom });
+    if (!fields.mappings.length) throw new Error("No fields were mapped; project generation was stopped");
     if (fields.unmapped.length) throw new Error(`Could not map requested fields: ${fields.unmapped.join(", ")}`);
 
     const project = await this.#executeAgent(runId, this.generator, {

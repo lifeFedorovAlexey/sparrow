@@ -57,6 +57,9 @@ src/
     observability/
       in-memory-run-log.js
   modules/
+    visual-mapping/
+      visual-schema.js
+      visual-preview.extractor.js
     task-planning/
       task-planner.agent.js
       task-description.parser.js
@@ -80,6 +83,9 @@ src/
     validation/
       validator.agent.js
   infrastructure/
+    browser/
+      visual-browser.controller.js
+      visual-overlay.js
     site-probes/
       http-site-probe.js
       site-evidence.detector.js

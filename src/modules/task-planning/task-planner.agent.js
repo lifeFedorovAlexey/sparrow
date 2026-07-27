@@ -13,11 +13,13 @@ export class TaskPlanner {
     const sourceDescription = String(description ?? "").trim();
     const url = parseUrl(sourceDescription);
     if (!url) throw new Error("Task description must contain a valid URL");
+    const fields = parseFields(sourceDescription);
+    if (!fields.length) throw new Error("Could not identify requested fields; AI Task Planner is required");
 
     return {
       url,
       schedule: parseSchedule(sourceDescription),
-      fields: parseFields(sourceDescription),
+      fields,
       output: parseOutput(sourceDescription),
       constraints: parseConstraints(sourceDescription),
       sourceDescription,

@@ -30,3 +30,11 @@ test("TaskPlanner rejects a task without a URL", async () => {
     /URL/i,
   );
 });
+
+test("TaskPlanner refuses to generate a project when requested fields were not understood", async () => {
+  const planner = new TaskPlanner();
+  await assert.rejects(
+    planner.execute({ description: "Собирай чемпионов и винрейты с https://wildriftallstats.ru в JSON" }),
+    /Could not identify requested fields/,
+  );
+});
