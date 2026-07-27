@@ -12,5 +12,8 @@
     "test": "node --test",
     "test:watch": "node --test --watch"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "cheerio": "^1.1.2"
+  }
 }

@@ -15,7 +15,16 @@ SiteAnalyzer ◄── SiteProbe adapter
 StrategySelector ──► REST | GraphQL | JSON | HTML | Playwright | Selenium
     │
     ▼
-Run result + audit events
+DOM Analyzer ──► repeated containers + stable selectors
+    │
+    ▼
+Field Mapper ──► requested fields + selectors
+    │
+    ▼
+Project Generator ──► runnable Node.js/Docker project
+    │
+    ▼
+Validator ──► execution report + output.json
 ```
 
 `HermesParserOrchestrator` coordinates this graph. It does not parse task text, inspect HTML, or select scraping technologies itself.
@@ -59,11 +68,24 @@ src/
     strategy-selection/
       strategy-selector.agent.js
       strategy-selector.agent.test.js
+    dom-analysis/
+      dom-analyzer.agent.js
+      repeated-container.inspector.js
+    field-mapping/
+      field-mapper.agent.js
+      field-candidate.matcher.js
+    project-generation/
+      project-generator.agent.js
+      project-template.renderer.js
+    validation/
+      validator.agent.js
   infrastructure/
     site-probes/
       http-site-probe.js
       site-evidence.detector.js
       http-site-probe.test.js
+    execution/
+      node-project.runner.js
 ```
 
 Tests are colocated with the behavior they verify. Modules own domain logic; `infrastructure` owns external I/O; `core` contains only orchestration and cross-cutting concerns.
@@ -72,12 +94,8 @@ Tests are colocated with the behavior they verify. Modules own domain logic; `in
 
 ```text
 src/modules/
-  dom-analysis/
   pagination-analysis/
-  field-mapping/
-  project-generation/
   code-generation/
-  validation/
   self-repair/
   exporting/
   scheduling/

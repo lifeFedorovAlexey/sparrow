@@ -16,6 +16,7 @@ export class SiteAnalyzer {
 
     return {
       url,
+      html: evidence.html ?? "",
       application,
       rendering,
       apis: [...(evidence.endpoints ?? [])],
