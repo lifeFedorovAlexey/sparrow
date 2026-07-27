@@ -4,12 +4,16 @@ import { createServer } from "node:http";
 import { VisualBrowserController } from "./visual-browser.controller.js";
 
 const html = `<!doctype html><html><body>
+  <div role="dialog" style="position:fixed;z-index:9999"><p>Cookie settings</p><button onclick="this.closest('[role=dialog]').remove()">Закрыть</button></div>
   <article class="Catalog-module__abc12__card"><b class="Catalog-module__abc12__hero">Aatrox</b><span class="Catalog-module__abc12__metric">1%</span><span class="Catalog-module__abc12__metric">11%</span><span class="Catalog-module__abc12__metric">51%</span></article>
   <article class="Catalog-module__abc12__card"><b class="Catalog-module__abc12__hero">Ahri</b><span class="Catalog-module__abc12__metric">2%</span><span class="Catalog-module__abc12__metric">12%</span><span class="Catalog-module__abc12__metric">52%</span></article>
 </body></html>`;
 
 test("visual browser guides clicks and previews arbitrary user labels", async (t) => {
-  const server = createServer((_, response) => response.end(html));
+  const server = createServer((_, response) => {
+    response.setHeader("content-type", "text/html; charset=utf-8");
+    response.end(html);
+  });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   t.after(() => server.close());
   const { port } = server.address();
@@ -23,6 +27,8 @@ test("visual browser guides clicks and previews arbitrary user labels", async (t
   await controller.open(`http://127.0.0.1:${port}`);
   const page = controller.page;
   assert.equal(await page.locator("#hermes-visual-toolbar").count(), 1);
+  await page.waitForTimeout(100);
+  assert.equal(await page.locator('[role="dialog"]').count(), 0);
 
   await page.locator("[data-mode=container]").click();
   await page.locator(".Catalog-module__abc12__hero").first().evaluate((element) => element.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true })));
@@ -50,4 +56,22 @@ test("visual browser guides clicks and previews arbitrary user labels", async (t
   await page.locator("[data-confirm]").click();
   await page.waitForFunction(() => document.querySelector("[data-role=instruction]").textContent.includes("Сохраняю"));
   assert.equal(confirmedSchema.fields.length, 2);
+});
+
+test("detects CAPTCHA and pauses for manual completion instead of bypassing it", async (t) => {
+  const server = createServer((_, response) => {
+    response.setHeader("content-type", "text/html; charset=utf-8");
+    response.end('<iframe src="https://captcha.example.test/challenge" style="width:300px;height:100px"></iframe>');
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => server.close());
+  const controller = new VisualBrowserController({ headless: true });
+  t.after(() => controller.close());
+
+  await controller.open(`http://127.0.0.1:${server.address().port}`);
+  await controller.page.waitForTimeout(100);
+
+  assert.deepEqual(controller.snapshot().interference, [{ type: "captcha", action: "manual-required" }]);
+  assert.match(controller.snapshot().message, /CAPTCHA/u);
+  assert.equal(await controller.page.locator('iframe[src*="captcha"]').count(), 1);
 });

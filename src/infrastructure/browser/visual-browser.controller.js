@@ -2,6 +2,7 @@ import { chromium } from "playwright-core";
 import { createVisualSchema, selectContainer, addField } from "../../modules/visual-mapping/visual-schema.js";
 import { installVisualOverlay } from "./visual-overlay.js";
 import { LiveSchemaRuntime } from "../../modules/extraction-runtime/live-schema.runtime.js";
+import { installInterferenceMitigator } from "./interference-mitigator.js";
 
 export class VisualBrowserController {
   constructor({ headless = false, channel = process.env.HERMES_BROWSER_CHANNEL ?? "chrome", runtime = new LiveSchemaRuntime(), onConfirm = async () => null } = {}) {
@@ -14,6 +15,7 @@ export class VisualBrowserController {
     this.schema = null;
     this.preview = [];
     this.message = "Откройте сайт";
+    this.interference = [];
   }
 
   async open(url) {
@@ -25,9 +27,11 @@ export class VisualBrowserController {
     this.page = await context.newPage();
     await this.page.exposeBinding("hermesSelect", (_, selection) => this.applySelection(selection));
     await this.page.exposeBinding("hermesConfirm", () => this.confirm());
+    await this.page.exposeBinding("hermesInterference", (_, event) => this.reportInterference(event));
     await this.page.addInitScript(installVisualOverlay);
     await this.page.goto(this.schema.url, { waitUntil: "domcontentloaded", timeout: 60_000 });
     this.message = "Выберите повторяющийся блок в открытом браузере";
+    await this.page.evaluate(installInterferenceMitigator);
     return this.snapshot();
   }
 
@@ -59,12 +63,18 @@ export class VisualBrowserController {
     return saved;
   }
 
+  reportInterference(event) {
+    this.interference.push(event);
+    if (event.type === "captcha") this.message = "Обнаружена CAPTCHA: решите её вручную в браузере, затем продолжайте";
+    return this.snapshot();
+  }
+
   async refreshPreview() {
     this.preview = await this.runtime.execute(this.page, this.schema);
   }
 
   snapshot() {
-    return { schema: this.schema, preview: this.preview.slice(0, 20), total: this.preview.length, message: this.message };
+    return { schema: this.schema, preview: this.preview.slice(0, 20), total: this.preview.length, message: this.message, interference: [...this.interference] };
   }
 
   async close() {
