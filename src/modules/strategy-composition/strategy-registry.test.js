@@ -22,3 +22,15 @@ test("does not add site-specific strategies or protection bypasses", () => {
   assert.deepEqual(plan.map((item) => item.id), ["html-dom", "pagination", "protected-session-gate"]);
   assert.ok(plan.every((item) => !/avito|ozon|wildberries/iu.test(item.id)));
 });
+
+test("composes directly from evidence-backed claim objects", () => {
+  const evidence = [{ kind: "fixture", detail: "observed", source: "test" }];
+  const strategies = registry.compose({
+    transports: [{ value: "json-script", evidence }, { value: "rest", evidence }],
+    listPatterns: [{ value: "pagination", evidence }],
+    obstacles: [{ value: "shadow-dom", evidence }],
+    protections: [{ value: "unknown", evidence: [] }],
+  }).map(({ id }) => id);
+
+  assert.deepEqual(strategies, ["structured-data-first", "api-first", "shadow-dom", "pagination"]);
+});

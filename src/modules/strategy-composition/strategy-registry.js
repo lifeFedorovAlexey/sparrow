@@ -1,7 +1,7 @@
-const has = (values, value) => values?.includes(value);
+const has = (values, value) => values?.some((item) => (typeof item === "string" ? item : item.value) === value);
 
 const definitions = [
-  { id: "structured-data-first", when: (p) => has(p.transports, "json-ld") || has(p.transports, "microdata") || has(p.transports, "embedded-json") },
+  { id: "structured-data-first", when: (p) => ["json-ld", "json-script", "microdata", "opengraph"].some((kind) => has(p.transports, kind)) },
   { id: "api-first", when: (p) => ["rest", "graphql", "xhr", "fetch"].some((kind) => has(p.transports, kind)) },
   { id: "html-dom", when: (p) => has(p.transports, "html") && !["rest", "graphql", "xhr", "fetch", "json-ld"].some((kind) => has(p.transports, kind)) },
   { id: "frame-tree", when: (p) => has(p.obstacles, "iframe") },
